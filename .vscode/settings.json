@@ -1,0 +1,7 @@
+{
+    "editor.fontFamily": "Fira Code",
+    "terminal.integrated.fontFamily": "Knack Nerd Font Mono",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+}
