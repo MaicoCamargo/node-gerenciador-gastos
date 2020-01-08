@@ -1,7 +1,7 @@
 const app = require('express')();
-const bodyParser = require('body-parser');
+const consign = require('consign');
 
-app.use(bodyParser.json());
+consign({ cwd: 'src', verbose: false }).include('./config/middleware.js').into(app);
 
 app.get('/', (req, res) => {
   res.status(200).send();
@@ -13,7 +13,7 @@ app.get('/users', (req, res) => {
 });
 
 app.post('/users', (req, res) => {
-  res.status(201).json(req.body);
+  res.status(201).send(req.body);
 });
 
 module.exports = app;

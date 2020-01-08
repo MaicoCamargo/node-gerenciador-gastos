@@ -10,7 +10,7 @@ test('deve listar todos usuarios', () => {
 });
 
 test('deve criar um usuario com sucesso', () => {
-  return request(app).post('/users', { nome: 'Eder Camargo' }).then((response) => {
+  return request(app).post('/users').send({ nome: 'Eder Camargo' }).then((response) => {
     expect(response.status).toBe(201);
     expect(response.body.nome).toBe('Eder Camargo');
   });
