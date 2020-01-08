@@ -3,5 +3,8 @@
     "terminal.integrated.fontFamily": "Knack Nerd Font Mono",
     "editor.formatOnPaste": true,
     "editor.formatOnSave": true,
-    "editor.tabSize": 2
+    "editor.tabSize": 2,
+    "editor.fontLigatures": true,
+    "eslint.format.enable": true,
+    "eslint.lintTask.enable": true
 }
