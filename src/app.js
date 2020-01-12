@@ -6,7 +6,11 @@ const knexFile = require('../knexfile');
 // TODO deixar variavel dinamica
 app.db = knex(knexFile.test);
 
-consign({ cwd: 'src', verbose: false }).include('./config/middleware.js').then('./routes').then('./config/routes.js')
+consign({ cwd: 'src', verbose: false })
+  .include('./config/middleware.js')
+  .then('./services')
+  .then('./routes')
+  .then('./config/routes.js')
   .into(app);
 
 app.get('/', (req, res) => {
