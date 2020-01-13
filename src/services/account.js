@@ -1,6 +1,6 @@
 module.exports = (app) => {
-  const find = () => {
-    return app.db('account').select();
+  const find = (filter = { }) => {
+    return app.db('account').where(filter).select();
   };
 
   const save = (account) => {

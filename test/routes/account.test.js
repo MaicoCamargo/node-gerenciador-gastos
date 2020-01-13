@@ -26,3 +26,11 @@ test('Listar todas as contas', async () => {
     expect(response.body.length).toBeGreaterThan(0);
   });
 });
+
+test('Listar conta buscando pelo id', async () => {
+  const result = await app.db('account').insert({ name: 'acc # (teste)', user_id: user.id }, '*');
+  const response = await request(app).get(`${ROTA_ACCOUNT}/${result[0].id}`);
+  expect(response.status).toBe(200);
+  expect(response.body.name).toBe('acc # (teste)');
+  expect(response.user_id).toBe(result.user_id);
+});

@@ -9,5 +9,10 @@ module.exports = (app) => {
     });
   };
 
-  return { findAll, create };
+  const findById = (req, res) => {
+    app.services.account.find({ id: req.params.id })
+      .then((result) => res.status(200).json(result[0]));
+  };
+
+  return { findAll, create, findById };
 };
