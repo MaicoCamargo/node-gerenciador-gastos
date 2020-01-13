@@ -12,7 +12,7 @@ beforeAll(async () => {
 test('Criar conta com sucesso', async () => {
   const response = await request(app).post(ROTA_ACCOUNT).send({ name: 'acc #1 (teste)', user_id: user.id });
   expect(response.status).toBe(201);
-  expect(response.body.nome).toBe('acc #1(teste)');
+  expect(response.body.name).toBe('acc #1 (teste)');
 });
 
 test('Listar todas as contas', async () => {
