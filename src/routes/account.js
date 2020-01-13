@@ -20,7 +20,7 @@ module.exports = (app) => {
   };
 
   const remove = (req, res) => {
-    app.services.account.deletar(req.params.id).then(() => res.status(204));
+    app.services.account.deletar(req.params.id).then(() => res.status(204).send());
   };
 
   return {

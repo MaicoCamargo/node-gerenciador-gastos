@@ -29,7 +29,9 @@ test('Listar todas as contas', async () => {
 
 test('Listar conta buscando pelo id', async () => {
   const result = await app.db('account').insert({ name: 'acc # (teste)', user_id: user.id }, '*');
+
   const response = await request(app).get(`${ROTA_ACCOUNT}/${result[0].id}`);
+
   expect(response.status).toBe(200);
   expect(response.body.name).toBe('acc # (teste)');
   expect(response.user_id).toBe(result.user_id);
@@ -37,8 +39,22 @@ test('Listar conta buscando pelo id', async () => {
 
 test('Alterar conta com sucesso', async () => {
   const responseContaCriada = await request(app).post(ROTA_ACCOUNT).send({ name: 'acc update #', user_id: user.id });
+
   const response = await request(app).put(`${ROTA_ACCOUNT}/${responseContaCriada.body.id}`).send({ name: 'acc *updated*', user_id: user.id });
+
   expect(response.status).toBe(200);
   expect(response.body.name).toBe('acc *updated*');
   expect(response.body.id).toBe(responseContaCriada.body.id);
+});
+
+test('Excluir uma conta', async () => {
+  const responseContaCriada = await request(app).post(ROTA_ACCOUNT).send({ name: 'acc delete #', user_id: user.id });
+
+  const response = await request(app).delete(`${ROTA_ACCOUNT}/${responseContaCriada.body.id}`);
+  expect(response.status).toBe(204);
+
+  const isDeleted = await app.db('account').where({ id: responseContaCriada.body.id });
+
+  expect(isDeleted).toEqual([]);
+  expect(isDeleted.length).toBe(0);
 });
