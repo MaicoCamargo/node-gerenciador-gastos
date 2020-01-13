@@ -6,5 +6,9 @@ module.exports = (app) => {
   const save = (account) => {
     return app.db('account').insert(account, '*');
   };
-  return { find, save };
+
+  const update = (id, account) => {
+    return app.db('account').where({ id }).update(account, '*');
+  };
+  return { find, save, update };
 };

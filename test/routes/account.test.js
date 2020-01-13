@@ -34,3 +34,9 @@ test('Listar conta buscando pelo id', async () => {
   expect(response.body.name).toBe('acc # (teste)');
   expect(response.user_id).toBe(result.user_id);
 });
+
+test('Alterar conta com sucesso', async () => {
+  const responseContaCriada = await request(app).post(ROTA_ACCOUNT).send({ name: 'acc update #', user_id: user.id });
+  const response = await request(app).put(`${ROTA_ACCOUNT}/${responseContaCriada.body.id}`).send({ name: 'acc maico #', user_id: 305 });
+  expect(response.status).toBe(200);
+});
