@@ -18,15 +18,15 @@ app.get('/', (req, res) => {
 });
 
 // TODO remover
-app.db
-  .on('query', (query) => {
-    console.log({ sql: query.sql, bindings: query.bindings ? query.bindings.join(',') : '' });
-  })
-  .on('query-response', (result) => {
-    console.log(result);
-  })
-  .on('error', (error) => {
-    console.log(error);
-  });
+// app.db
+//   .on('query', (query) => {
+//     console.log({ sql: query.sql, bindings: query.bindings ? query.bindings.join(',') : '' });
+//   })
+//   .on('query-response', (result) => {
+//     console.log(result);
+//   })
+//   .on('error', (error) => {
+//     console.log(error);
+//   });
 
 module.exports = app;
