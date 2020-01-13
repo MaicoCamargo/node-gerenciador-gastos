@@ -19,7 +19,11 @@ module.exports = (app) => {
       .then((result) => res.status(200).json(result[0]));
   };
 
+  const remove = (req, res) => {
+    app.services.account.deletar(req.params.id).then(() => res.status(204));
+  };
+
   return {
-    findAll, create, findById, update,
+    findAll, create, findById, update, remove,
   };
 };

@@ -37,6 +37,8 @@ test('Listar conta buscando pelo id', async () => {
 
 test('Alterar conta com sucesso', async () => {
   const responseContaCriada = await request(app).post(ROTA_ACCOUNT).send({ name: 'acc update #', user_id: user.id });
-  const response = await request(app).put(`${ROTA_ACCOUNT}/${responseContaCriada.body.id}`).send({ name: 'acc maico #', user_id: 305 });
+  const response = await request(app).put(`${ROTA_ACCOUNT}/${responseContaCriada.body.id}`).send({ name: 'acc *updated*', user_id: user.id });
   expect(response.status).toBe(200);
+  expect(response.body.name).toBe('acc *updated*');
+  expect(response.body.id).toBe(responseContaCriada.body.id);
 });
