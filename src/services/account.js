@@ -1,10 +1,10 @@
 module.exports = (app) => {
-  const findAll = () => {
+  const find = () => {
     return app.db('account').select();
   };
 
   const save = (account) => {
     return app.db('account').insert(account, '*');
   };
-  return { findAll, save };
+  return { find, save };
 };

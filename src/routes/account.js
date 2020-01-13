@@ -1,7 +1,6 @@
 module.exports = (app) => {
   const findAll = (req, res) => {
-    // TODO chamar service que busca todas as contas
-    res.status(200).json(req.body);
+    return app.services.account.find().then((result) => res.status(200).json(result));
   };
 
   const create = (req, res) => {
