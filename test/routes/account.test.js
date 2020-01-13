@@ -15,6 +15,12 @@ test('Criar conta com sucesso', async () => {
   expect(response.body.name).toBe('acc #1 (teste)');
 });
 
+test('Não deve inserir uma conta sem nome', async () => {
+  const response = await request(app).post(ROTA_ACCOUNT).send({ user_id: user.id });
+  expect(response.status).toBe(400);
+  expect(response.body.error).toBe('Nome é um campo obrigatório');
+});
+
 test('Listar todas as contas', async () => {
   /**
    * inserino uma conta para que um teste não dependa do outro

@@ -3,7 +3,12 @@ module.exports = (app) => {
     return app.db('account').where(filter).select();
   };
 
-  const save = (account) => {
+  const save = async (account) => {
+    console.log(account);
+    if (!account.name) {
+      return { error: 'Nome é um campo obrigatório' };
+    }
+
     return app.db('account').insert(account, '*');
   };
 
