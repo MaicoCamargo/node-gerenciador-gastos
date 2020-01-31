@@ -1,12 +1,14 @@
+const ValidationError = require('../errors/validationError');
+
+
 module.exports = (app) => {
   const find = (filter = { }) => {
     return app.db('account').where(filter).select();
   };
 
   const save = async (account) => {
-    console.log(account);
     if (!account.name) {
-      return { error: 'Nome é um campo obrigatório' };
+      throw new ValidationError('Nome é um campo obrigatório');
     }
 
     return app.db('account').insert(account, '*');

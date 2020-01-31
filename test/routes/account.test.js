@@ -64,3 +64,13 @@ test('Excluir uma conta', async () => {
   expect(isDeleted).toEqual([]);
   expect(isDeleted.length).toBe(0);
 });
+
+test.skip('listar contas do usuário', () => {});
+
+test.skip('Não deve listar contas de outro usuário', () => { });
+
+test.skip('Não deve alterar contas de outro usuário', () => { });
+
+test.skip('Não deve remover contas de outro usuário', () => { });
+
+test.skip('Não deve inserir uma conta com nome duplicado', () => { });

@@ -5,7 +5,9 @@ module.exports = (app) => {
 
   const create = (req, res) => {
     app.services.account.save(req.body).then((result) => {
-      return res.status(result.error ? 400 : 201).json(result.error ? result : result[0]);
+      return res.status(201).json(result[0]);
+    }).catch((err) => {
+      return res.status(400).json({ error: err.message });
     });
   };
 
