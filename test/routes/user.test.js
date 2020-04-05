@@ -7,6 +7,7 @@ test('Deve listar todos usuarios', () => {
   return request(app).get('/users').then((response) => {
     expect(response.status).toBe(200);
     expect(response.body.length).toBeGreaterThan(0);
+    expect(response.body[0]).not.toHaveProperty('passwd');
   });
 });
 
@@ -14,6 +15,7 @@ test('Deve criar um usuario com sucesso', () => {
   return request(app).post('/users').send({ nome: 'Eder Camargo', mail, passwd: '1234' }).then((response) => {
     expect(response.status).toBe(201);
     expect(response.body.nome).toBe('Eder Camargo');
+    expect(response.body).not.toHaveProperty('passwd');
   });
 });
 

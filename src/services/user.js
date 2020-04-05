@@ -2,7 +2,7 @@ const ValidationError = require('../errors/validationError');
 
 module.exports = (app) => {
   const findAll = (filter = {}) => {
-    return app.db('user').where(filter).select();
+    return app.db('user').where(filter).select(['nome', 'mail', 'id']);
   };
 
   const save = async (user) => {
@@ -13,7 +13,7 @@ module.exports = (app) => {
     const userDB = await findAll({ mail: user.mail });
     if (userDB && userDB.length) throw new ValidationError('Já existe um usuario com esse email');
 
-    return app.db('user').insert(user, '*');
+    return app.db('user').insert(user, ['nome', 'mail', 'id']);
   };
 
   return { save, findAll };
