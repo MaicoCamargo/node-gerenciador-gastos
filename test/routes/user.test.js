@@ -7,6 +7,7 @@ test('Deve listar todos usuarios', () => {
   return request(app).get('/users').then((response) => {
     expect(response.status).toBe(200);
     expect(response.body.length).toBeGreaterThan(0);
+    expect(response.body[0]).not.toHaveProperty('passwd');
   });
 });
 
@@ -14,6 +15,7 @@ test('Deve criar um usuario com sucesso', () => {
   return request(app).post('/users').send({ nome: 'Eder Camargo', mail, passwd: '1234' }).then((response) => {
     expect(response.status).toBe(201);
     expect(response.body.nome).toBe('Eder Camargo');
+    expect(response.body).not.toHaveProperty('passwd');
   });
 });
 
@@ -51,6 +53,15 @@ test('Não deve criar um usuario sem senha', (done) => {
 
 test('Não deve cadastrar usuario com email já inserido', async () => {
   const result = await request(app).post('/users').send({ nome: 'Eder Camargo', mail, passwd: '1234' });
-  expect(result.status).toBe(400);
   expect(result.body.error).toBe('Já existe um usuario com esse email');
+  expect(result.status).toBe(400);
+});
+
+test('Deve criar usuário com senha criptografada', async () => {
+  const passwd = '123456';
+  const response = await request(app).post('/users').send({ nome: 'Eder Camargo - crip', mail, passwd });
+  const userCreated = response.body;
+  const senhaCript = await app.services.user.findOne({ ...userCreated.id });
+  expect(senhaCript).not.toBeUndefined();
+  expect(senhaCript).not.toBe(passwd);
 });

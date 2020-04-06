@@ -17,6 +17,16 @@ app.get('/', (req, res) => {
   res.status(200).send();
 });
 
+app.use((err, req, res, next) => {
+  const { name, message, stack } = err;
+  if (name === 'Validation Error') {
+    res.status(400).json({ error: err.message });
+  } else {
+    res.status(500).json({ name, message, stack });
+  }
+  next(err);
+});
+
 // TODO remover
 // app.db
 //   .on('query', (query) => {
