@@ -7,7 +7,6 @@ module.exports = (app) => {
   const signin = async (req, res, next) => {
     app.services.user.findOne({ mail: req.body.mail })
       .then((usuario) => {
-
         if (bcrypt.compareSync(req.body.passwd, usuario.passwd)) {
           const payload = {
             id: usuario.id,
@@ -16,7 +15,7 @@ module.exports = (app) => {
           };
           const token = jwt.encode(payload, segredo);
           res.status(200)
-            .json({token});
+            .json({ token });
         }
       })
       .catch((error) => next(error));
