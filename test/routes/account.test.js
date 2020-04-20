@@ -3,20 +3,27 @@ const app = require('../../src/app');
 
 let user;
 const ROTA_ACCOUNT = '/account';
+let token;
 
 beforeAll(async () => {
-  const result = await app.services.user.save({ nome: 'User acc', mail: `testeACC${Date.now()}@mail.com`, passwd: '1234' });
+  const mail = `testeACC${Date.now()}@mail.com`;
+  const passwd = '1234';
+  const result = await app.services.user.save({ nome: 'User acc', mail, passwd });
   user = { ...result[0] };
+  const response = await request(app).post('/auth/signin').send({ mail, passwd });
+  expect(response.status).toBe(200);
+  expect(response.body).toHaveProperty('token');
+  token = response.body.token;
 });
 
 test('Criar conta com sucesso', async () => {
-  const response = await request(app).post(ROTA_ACCOUNT).send({ name: 'acc #1 (teste)', user_id: user.id });
+  const response = await request(app).post(ROTA_ACCOUNT).send({ name: 'acc #1 (teste)', user_id: user.id }).set('Authorization', `bearer ${token}`);
   expect(response.status).toBe(201);
   expect(response.body.name).toBe('acc #1 (teste)');
 });
 
 test('Não deve inserir uma conta sem nome', async () => {
-  const response = await request(app).post(ROTA_ACCOUNT).send({ user_id: user.id });
+  const response = await request(app).post(ROTA_ACCOUNT).send({ user_id: user.id }).set('Authorization', `bearer ${token}`);
   expect(response.status).toBe(400);
   expect(response.body.error).toBe('Nome é um campo obrigatório');
 });
@@ -26,9 +33,9 @@ test('Listar todas as contas', async () => {
    * inserino uma conta para que um teste não dependa do outro
    *  - o teste anterior já insere uma conta
    */
-  await request(app).post(ROTA_ACCOUNT).send({ name: 'acc #list (teste)', user_id: user.id });
+  await request(app).post(ROTA_ACCOUNT).send({ name: 'acc #list (teste)', user_id: user.id }).set('Authorization', `bearer ${token}`);
 
-  await request(app).get(ROTA_ACCOUNT).then((response) => {
+  await request(app).get(ROTA_ACCOUNT).set('Authorization', `bearer ${token}`).then((response) => {
     expect(response.body.length).toBeGreaterThan(0);
   });
 });
@@ -36,7 +43,7 @@ test('Listar todas as contas', async () => {
 test('Listar conta buscando pelo id', async () => {
   const result = await app.db('account').insert({ name: 'acc # (teste)', user_id: user.id }, '*');
 
-  const response = await request(app).get(`${ROTA_ACCOUNT}/${result[0].id}`);
+  const response = await request(app).get(`${ROTA_ACCOUNT}/${result[0].id}`).set('Authorization', `bearer ${token}`);
 
   expect(response.status).toBe(200);
   expect(response.body.name).toBe('acc # (teste)');
@@ -44,9 +51,9 @@ test('Listar conta buscando pelo id', async () => {
 });
 
 test('Alterar conta com sucesso', async () => {
-  const responseContaCriada = await request(app).post(ROTA_ACCOUNT).send({ name: 'acc update #', user_id: user.id });
+  const responseContaCriada = await request(app).post(ROTA_ACCOUNT).send({ name: 'acc update #', user_id: user.id }).set('Authorization', `bearer ${token}`);
 
-  const response = await request(app).put(`${ROTA_ACCOUNT}/${responseContaCriada.body.id}`).send({ name: 'acc *updated*', user_id: user.id });
+  const response = await request(app).put(`${ROTA_ACCOUNT}/${responseContaCriada.body.id}`).send({ name: 'acc *updated*', user_id: user.id }).set('Authorization', `bearer ${token}`);
 
   expect(response.status).toBe(200);
   expect(response.body.name).toBe('acc *updated*');
@@ -54,9 +61,9 @@ test('Alterar conta com sucesso', async () => {
 });
 
 test('Excluir uma conta', async () => {
-  const responseContaCriada = await request(app).post(ROTA_ACCOUNT).send({ name: 'acc delete #', user_id: user.id });
+  const responseContaCriada = await request(app).post(ROTA_ACCOUNT).set('Authorization', `bearer ${token}`).send({ name: 'acc delete #', user_id: user.id });
 
-  const response = await request(app).delete(`${ROTA_ACCOUNT}/${responseContaCriada.body.id}`);
+  const response = await request(app).delete(`${ROTA_ACCOUNT}/${responseContaCriada.body.id}`).set('Authorization', `bearer ${token}`);
   expect(response.status).toBe(204);
 
   const isDeleted = await app.db('account').where({ id: responseContaCriada.body.id });
