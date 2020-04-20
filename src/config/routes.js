@@ -6,7 +6,7 @@ module.exports = (app) => {
   app.route('/auth/signup')
     .post(app.routes.users.create);
 
-  app.route('/users')
+  app.route('/user')
     .all(app.config.passport.authenticate())
     .get(app.routes.users.findAll)
     .post(app.routes.users.create);

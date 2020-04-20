@@ -25,7 +25,7 @@ beforeAll(async () => {
 });
 
 test('Deve listar todos usuarios', () => {
-  return request(app).get('/users').set('Authorization', `bearer ${token}`).then((response) => {
+  return request(app).get('/user').set('Authorization', `bearer ${token}`).then((response) => {
     expect(response.status).toBe(200);
     expect(response.body.length).toBeGreaterThan(0);
     expect(response.body[0]).not.toHaveProperty('passwd');
@@ -33,7 +33,7 @@ test('Deve listar todos usuarios', () => {
 });
 
 test('Deve criar um usuario com sucesso', () => {
-  return request(app).post('/users').send({ nome: 'Eder Camargo', mail, passwd: '1234' }).set('Authorization', `bearer ${token}`)
+  return request(app).post('/user').send({ nome: 'Eder Camargo', mail, passwd: '1234' }).set('Authorization', `bearer ${token}`)
     .then((response) => {
       expect(response.status).toBe(201);
       expect(response.body.nome).toBe('Eder Camargo');
@@ -45,7 +45,7 @@ test('Deve criar um usuario com sucesso', () => {
  * teste usando return
  */
 test('Não deve criar um usuario sem nome', () => {
-  return request(app).post('/users').send({ mail: 'test@email.com', passwd: '1234' }).set('Authorization', `bearer ${token}`)
+  return request(app).post('/user').send({ mail: 'test@email.com', passwd: '1234' }).set('Authorization', `bearer ${token}`)
     .then((response) => {
       expect(response.status).toBe(400);
       expect(response.body.error).toBe('Nome é um atributo obrigatório');
@@ -56,7 +56,7 @@ test('Não deve criar um usuario sem nome', () => {
  * teste usando async await
  */
 test('Não deve criar um usuario sem email', async () => {
-  const result = await request(app).post('/users').send({ nome: 'ana pa', passwd: '1234' }).set('Authorization', `bearer ${token}`);
+  const result = await request(app).post('/user').send({ nome: 'ana pa', passwd: '1234' }).set('Authorization', `bearer ${token}`);
   expect(result.status).toBe(400);
   expect(result.body.error).toBe('Email é um atributo obrigatório');
 });
@@ -66,7 +66,7 @@ test('Não deve criar um usuario sem email', async () => {
  * - caso der erro pegar no catch e usar done.fail() para sinal que o teste falhou
  */
 test('Não deve criar um usuario sem senha', (done) => {
-  request(app).post('/users').send({ nome: 'ana pa', mail: 'test@email.com' }).set('Authorization', `bearer ${token}`)
+  request(app).post('/user').send({ nome: 'ana pa', mail: 'test@email.com' }).set('Authorization', `bearer ${token}`)
     .then((result) => {
       expect(result.status).toBe(400);
       expect(result.body.error).toBe('Senha é um atributo obrigatório');
@@ -75,14 +75,14 @@ test('Não deve criar um usuario sem senha', (done) => {
 });
 
 test('Não deve cadastrar usuario com email já inserido', async () => {
-  const result = await request(app).post('/users').set('Authorization', `bearer ${token}`).send({ nome: 'Eder Camargo', mail, passwd: '1234' });
+  const result = await request(app).post('/user').set('Authorization', `bearer ${token}`).send({ nome: 'Eder Camargo', mail, passwd: '1234' });
   expect(result.body.error).toBe('Já existe um usuario com esse email');
   expect(result.status).toBe(400);
 });
 
 test('Deve criar usuário com senha criptografada', async () => {
   const passwd = '123456';
-  const response = await request(app).post('/users')
+  const response = await request(app).post('/user')
     .set('Authorization', `bearer ${token}`)
     .send({ nome: 'Eder Camargo - crip', mail: `crip${Date.now()}`, passwd });
   const { id } = response.body;

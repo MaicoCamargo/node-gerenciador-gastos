@@ -45,6 +45,6 @@ test('Não Deve logar com usuário que não existe', async () => {
 });
 
 test('Não deve acessar uma rota protegida sem token',async () => {
-  const response = await request(app).get('/users');
+  const response = await request(app).get('/user');
   expect(response.status).toBe(401);
 });
