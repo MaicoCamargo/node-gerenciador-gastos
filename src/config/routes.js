@@ -1,3 +1,4 @@
+/*
 module.exports = (app) => {
   app.route('/auth/signin')
     .post(app.routes.auth.signin);
@@ -21,3 +22,4 @@ module.exports = (app) => {
     .put(app.routes.account.update)
     .delete(app.routes.account.remove);
 };
+*/
