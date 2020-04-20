@@ -2,7 +2,9 @@ const request = require('supertest');
 const app = require('../../src/app');
 
 let user;
-const ROTA_ACCOUNT = '/account';
+const AUTH_ROUTE = '/auth/signin';
+const MAIN_ROUTE = '/api';
+const ROTA_ACCOUNT = `${MAIN_ROUTE}/account`;
 let token;
 
 beforeAll(async () => {
@@ -10,7 +12,7 @@ beforeAll(async () => {
   const passwd = '1234';
   const result = await app.services.user.save({ nome: 'User acc', mail, passwd });
   user = { ...result[0] };
-  const response = await request(app).post('/auth/signin').send({ mail, passwd });
+  const response = await request(app).post(AUTH_ROUTE).send({ mail, passwd });
   expect(response.status).toBe(200);
   expect(response.body).toHaveProperty('token');
   token = response.body.token;
