@@ -50,7 +50,7 @@ test('Não Deve logar com usuário que não existe', async () => {
   expect(response.body.error).toBe('Login Invalido');
 });
 
-test('Não deve acessar uma rota protegida sem token',async () => {
+test('Não deve acessar uma rota protegida sem token', async () => {
   const response = await request(app).get(USER_ROUTE);
   expect(response.status).toBe(401);
 });
