@@ -11,7 +11,12 @@ module.exports = (app) => {
   });
 
   router.post('/', (req, res, next) => {
-    app.services.account.save(req.body).then((result) => {
+    /*-----------------------------------------
+    *  req.user -> onde a lib passport joga os dados do usuario logado (dados do token)
+    * user_id -> estratégia para o id ser sobreescrito
+    * -----------------------------------------
+    * */
+    app.services.account.save({ ...req.body, user_id: req.user.id }).then((result) => {
       return res.status(201).json(result[0]);
     }).catch((error) => next(error));
   });

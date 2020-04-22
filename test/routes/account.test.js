@@ -19,27 +19,15 @@ beforeAll(async () => {
 });
 
 test('Criar conta com sucesso', async () => {
-  const response = await request(app).post(ROTA_ACCOUNT).send({ name: 'acc #1 (teste)', user_id: user.id }).set('Authorization', `bearer ${token}`);
+  const response = await request(app).post(ROTA_ACCOUNT).send({ name: 'acc #1 (teste)' }).set('Authorization', `bearer ${token}`);
   expect(response.status).toBe(201);
   expect(response.body.name).toBe('acc #1 (teste)');
 });
 
 test('Não deve inserir uma conta sem nome', async () => {
-  const response = await request(app).post(ROTA_ACCOUNT).send({ user_id: user.id }).set('Authorization', `bearer ${token}`);
+  const response = await request(app).post(ROTA_ACCOUNT).send({ }).set('Authorization', `bearer ${token}`);
   expect(response.status).toBe(400);
   expect(response.body.error).toBe('Nome é um campo obrigatório');
-});
-
-test('Listar todas as contas', async () => {
-  /**
-   * inserino uma conta para que um teste não dependa do outro
-   *  - o teste anterior já insere uma conta
-   */
-  await request(app).post(ROTA_ACCOUNT).send({ name: 'acc #list (teste)', user_id: user.id }).set('Authorization', `bearer ${token}`);
-
-  await request(app).get(ROTA_ACCOUNT).set('Authorization', `bearer ${token}`).then((response) => {
-    expect(response.body.length).toBeGreaterThan(0);
-  });
 });
 
 test('Listar conta buscando pelo id', async () => {
