@@ -5,7 +5,7 @@ module.exports = (app) => {
 
 
   router.get('/', (req, res, next) => {
-    app.services.account.find({ user_id: req.user.id })
+    app.services.account.findAll(req.user.id)
       .then((result) => res.status(200).json(result))
       .catch((error) => next(error));
   });
@@ -23,7 +23,7 @@ module.exports = (app) => {
 
   router.get('/:id', (req, res, next) => {
     app.services.account.find({ id: req.params.id })
-      .then((result) => res.status(200).json(result[0]))
+      .then((result) => res.status(200).json(result))
       .catch((error) => next(error));
   });
 

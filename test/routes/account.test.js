@@ -38,12 +38,12 @@ test('Não deve inserir uma conta sem nome', async () => {
 });
 
 test('Listar conta buscando pelo id', async () => {
-  const result = await app.db('account').insert({ name: 'acc # (teste)', user_id: user.id }, '*');
+  const result = await app.db('account').insert({ name: 'acc by id# (teste)', user_id: user.id }, '*');
 
   const response = await request(app).get(`${ROTA_ACCOUNT}/${result[0].id}`).set('Authorization', `bearer ${token}`);
 
   expect(response.status).toBe(200);
-  expect(response.body.name).toBe('acc # (teste)');
+  expect(response.body.name).toBe('acc by id# (teste)');
   expect(response.user_id).toBe(result.user_id);
 });
 
@@ -70,7 +70,7 @@ test('Excluir uma conta', async () => {
 });
 
 test('Deve listar contas do usuário logado', async () => {
-  app.db('accounts').insert([
+  app.db('account').insert([
     { name: 'conta #1', user_id: user.id },
     { name: 'conta #1', user_id: user2.id },
   ]).then(async () => {
@@ -87,4 +87,9 @@ test.skip('Não deve alterar contas de outro usuário', () => { });
 
 test.skip('Não deve remover contas de outro usuário', () => { });
 
-test.skip('Não deve inserir uma conta com nome duplicado, para o mesmo usuario', () => { });
+test('Não deve inserir uma conta com nome duplicado, para o mesmo usuario', async () => {
+  await app.db('account').insert([{ name: 'conta #duplicada', user_id: user.id }]);
+  const response = await request(app).post(ROTA_ACCOUNT).set('Authorization', `bearer ${token}`).send({ name: 'conta #duplicada' });
+  expect(response.status).toBe(400);
+  expect(response.body.error).toBe('Já existe uma conta com este nome');
+});
