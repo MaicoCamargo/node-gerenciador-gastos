@@ -6,13 +6,20 @@ const AUTH_ROUTE = '/auth/signin';
 const MAIN_ROUTE = '/api';
 const ROTA_ACCOUNT = `${MAIN_ROUTE}/account`;
 let token;
+let user2;
 
-beforeAll(async () => {
+/* beforeAll -> executa antes de todos os testes
+   beforeEach -> executa antes de cada um dos testes */
+beforeEach(async () => {
   const mail = `testeACC${Date.now()}@mail.com`;
   const passwd = '1234';
   const result = await app.services.user.save({ nome: 'User acc', mail, passwd });
   user = { ...result[0] };
   const response = await request(app).post(AUTH_ROUTE).send({ mail, passwd });
+
+  const resultInsert = await app.services.user.save({ nome: 'User #2', mail: `acc_${Date.now()}@email`, passwd: 'teste' });
+  user2 = { ...resultInsert[0] };
+
   expect(response.status).toBe(200);
   expect(response.body).toHaveProperty('token');
   token = response.body.token;
@@ -62,7 +69,17 @@ test('Excluir uma conta', async () => {
   expect(isDeleted.length).toBe(0);
 });
 
-test.skip('listar contas do usuário', () => {});
+test('Deve listar contas do usuário logado', async () => {
+  app.db('accounts').insert([
+    { name: 'conta #1', user_id: user.id },
+    { name: 'conta #1', user_id: user2.id },
+  ]).then(async () => {
+    const response = await request(app).get(ROTA_ACCOUNT).set('Authorization', `bearer ${token}`);
+    expect(response.status).toBe(200);
+    expect(response.body.length).toBe(1);
+    expect(response.body[0].name).toBe('conta #1');
+  });
+});
 
 test.skip('Não deve listar contas de outro usuário', () => { });
 
@@ -70,4 +87,4 @@ test.skip('Não deve alterar contas de outro usuário', () => { });
 
 test.skip('Não deve remover contas de outro usuário', () => { });
 
-test.skip('Não deve inserir uma conta com nome duplicado', () => { });
+test.skip('Não deve inserir uma conta com nome duplicado, para o mesmo usuario', () => { });
