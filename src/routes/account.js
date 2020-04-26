@@ -1,8 +1,19 @@
 const express = require('express');
+const RecursoIndevidoError = require('../errors/recursoIndevidoError');
 
 module.exports = (app) => {
   const router = express.Router();
 
+  /*----------------------
+    - middleware que valida se o recurso que esta sendo acessado pertence ao usuario da requisição
+      que esta no token
+  * ----------------------*/
+  router.param('id', async (req, res, next) => {
+    await app.services.account.find({ id: req.params.id }).then((recurso) => {
+      if (recurso.user_id !== req.user.id) throw new RecursoIndevidoError();
+      else next();
+    }).catch((err) => next(err));
+  });
 
   router.get('/', (req, res, next) => {
     app.services.account.findAll(req.user.id)

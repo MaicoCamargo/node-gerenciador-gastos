@@ -72,7 +72,7 @@ test('Excluir uma conta', async () => {
 test('Deve listar contas do usuário logado', async () => {
   app.db('account').insert([
     { name: 'conta #1', user_id: user.id },
-    { name: 'conta #1', user_id: user2.id },
+    { name: 'conta #3', user_id: user2.id },
   ]).then(async () => {
     const response = await request(app).get(ROTA_ACCOUNT).set('Authorization', `bearer ${token}`);
     expect(response.status).toBe(200);
@@ -81,11 +81,47 @@ test('Deve listar contas do usuário logado', async () => {
   });
 });
 
-test.skip('Não deve listar contas de outro usuário', () => { });
+test('Não deve listar contas de outro usuário', async () => {
+  /*--------------------
+  * - criar uma conta para o usuario 2
+  * - tentar acesso com outro usuario (dentro da variavel token)
+  * --------------------*/
+  // criando conta para o usuario 2
+  const contaUser2 = await app.db('account').insert({ name: 'conta #1', user_id: user2.id }, ['id']);
 
-test.skip('Não deve alterar contas de outro usuário', () => { });
+  // tentando acessar a conta com outro usuario
+  const response = await request(app).get(`${ROTA_ACCOUNT}/${contaUser2[0].id}`).set('Authorization', `bearer ${token}`);
+  expect(response.status).toBe(403);
+  expect(response.body.error).toBe('Este recurso não pertence a este usuário');
+});
 
-test.skip('Não deve remover contas de outro usuário', () => { });
+test('Não deve alterar contas de outro usuário', async () => {
+  /*--------------------
+  * - criar uma conta para o usuario 2
+  * - tentar acesso com outro usuario (dentro da variavel token)
+  * --------------------*/
+  // criando conta para o usuario 2
+  const contaUser2 = await app.db('account').insert({ name: 'conta #1', user_id: user2.id }, ['id']);
+
+  // tentando acessar a conta com outro usuario
+  const response = await request(app).put(`${ROTA_ACCOUNT}/${contaUser2[0].id}`).set('Authorization', `bearer ${token}`).send({ name: 'acc update #teste@' });
+  expect(response.status).toBe(403);
+  expect(response.body.error).toBe('Este recurso não pertence a este usuário');
+});
+
+test('Não deve remover contas de outro usuário',async () => {
+  /*--------------------
+  * - criar uma conta para o usuario 2
+  * - tentar acesso com outro usuario (dentro da variavel token)
+  * --------------------*/
+  // criando conta para o usuario 2
+  const contaUser2 = await app.db('account').insert({ name: 'conta #2353', user_id: user2.id }, ['id']);
+
+  // tentando acessar a conta com outro usuario
+  const response = await request(app).delete(`${ROTA_ACCOUNT}/${contaUser2[0].id}`).set('Authorization', `bearer ${token}`);
+  expect(response.status).toBe(403);
+  expect(response.body.error).toBe('Este recurso não pertence a este usuário');
+});
 
 test('Não deve inserir uma conta com nome duplicado, para o mesmo usuario', async () => {
   await app.db('account').insert([{ name: 'conta #duplicada', user_id: user.id }]);
