@@ -40,14 +40,22 @@ beforeAll(async () => {
 
   // criando duas contas uma para cada usuario
   [conta, conta2] = await app.db('account')
-    .insert([
-      {
-        name: `conta #1 user ${user.name} and id [${user.id}]`,
-        user_id: user.id,
-      },
-      {
-        name: `conta #2 user ${user2.name} and id [${user2.id}]`,
-        user_id: user2.id,
-      },
-    ], '*');
+    .insert(
+      [
+        { name: `conta #1 user ${user.name} and id [${user.id}]`, user_id: user.id },
+        { name: `conta #2 user ${user2.name} and id [${user2.id}]`, user_id: user2.id },
+      ],
+      '*',
+    );
+});
+
+test('Deve lista apenas a conta do usuário logado', async () => {
+  await app.db('transactions').insert([
+    { descripition: 'conta 1 descr', type: 'I', date: new Date(), amnount: 205.56, acc_id: conta.id },
+    { descripition: 'conta 2 descr', type: 'O', date: new Date(), amnount: 125.56, acc_id: conta2.id },
+  ]);
+  const response = await request(app).get(TRANSACTION_ACCOUNT).set('Authorization', `bearer ${token}`);
+  expect(response.status).toBe(200);
+  expect(response.body).toHaveLength(1);
+  expect(response.body[0].descripition).toBe('conta 1 descr');
 });
