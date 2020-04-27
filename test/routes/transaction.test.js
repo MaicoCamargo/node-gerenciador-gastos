@@ -51,19 +51,19 @@ beforeAll(async () => {
 
 test('Deve lista apenas a conta do usuário logado', async () => {
   await app.db('transactions').insert([
-    { descripition: 'conta 1 descr', type: 'I', date: new Date(), amnount: 205.56, acc_id: conta.id },
-    { descripition: 'conta 2 descr', type: 'O', date: new Date(), amnount: 125.56, acc_id: conta2.id },
+    { description: 'conta 1 descr', type: 'I', date: new Date(), amnount: 205.56, acc_id: conta.id },
+    { description: 'conta 2 descr', type: 'O', date: new Date(), amnount: 125.56, acc_id: conta2.id },
   ]);
   const response = await request(app).get(TRANSACTION_ACCOUNT).set('Authorization', `bearer ${token}`);
   expect(response.status).toBe(200);
   expect(response.body).toHaveLength(1);
-  expect(response.body[0].descripition).toBe('conta 1 descr');
+  expect(response.body[0].description).toBe('conta 1 descr');
 });
 
 test('Deve criar uma transação com sucesso', async () => {
   const response = await request(app).post(TRANSACTION_ACCOUNT)
     .set('Authorization', `bearer ${token}`)
-    .send({ descripition: 'new tra post test', date: new Date(), amnount: 22, type: 'I', acc_id: conta.id });
+    .send({ description: 'new tra post test', date: new Date(), amnount: 22, type: 'I', acc_id: conta.id });
   expect(response.status).toBe(201);
   expect(response.body.acc_id).toBe(conta.id);
 });
@@ -74,7 +74,7 @@ test('Deve retornar uma transação por ID', async () => {
     .post(TRANSACTION_ACCOUNT)
     .set('Authorization', `bearer ${token}`)
     .send({
-      descripition: 'transação get id',
+      description: 'transação get id',
       date: new Date(),
       amnount: 985,
       type: 'O',
@@ -86,5 +86,33 @@ test('Deve retornar uma transação por ID', async () => {
   const response = await request(app).get(`${TRANSACTION_ACCOUNT}/${novaTransacao.body.id}`)
     .set('Authorization', `bearer ${token}`);
   expect(response.status).toBe(200);
-  expect(response.body.descripition).toBe('transação get id');
+  expect(response.body.description).toBe('transação get id');
+});
+
+test('Devo editar uma transação', async () => {
+  // cria uma nova transação
+  const insert = await app.db('transactions').insert({
+    description: 'transação # teste update',
+    date: new Date(),
+    amnount: 1,
+    type: 'I',
+    acc_id: conta.id,
+  }, '*');
+  const { id } = insert[0];
+  expect(id).not.toBeNull();
+
+  // tenta editar a transação
+  const response = await request(app).put(`${TRANSACTION_ACCOUNT}/${id}`)
+    .set('Authorization', `bearer ${token}`).send({
+      description: 'upd@ transação',
+      date: new Date(),
+      amnount: 7.96,
+      type: 'I',
+      acc_id: conta.id,
+    });
+
+  const { description } = response.body;
+  expect(response.status).toBe(200);
+  expect(response.body.description).toBe(description);
+  expect(response.body.id).toBe(id);
 });
