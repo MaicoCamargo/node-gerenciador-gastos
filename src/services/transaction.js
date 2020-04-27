@@ -25,5 +25,14 @@ module.exports = (app) => {
     return app.db('transactions').insert(transaction, '*');
   };
 
-  return { find, save };
+  /**
+   * retorna uma unica transação
+   * @param filter - coluna e valor que devem ser usados no where
+   * @return {*} - retorna a primeira transação encontrada na consulta
+   */
+  const findOne = (filter) => {
+    return app.db('transactions').where(filter).first();
+  };
+
+  return { find, save, findOne };
 };

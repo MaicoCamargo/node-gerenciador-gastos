@@ -67,3 +67,24 @@ test('Deve criar uma transação com sucesso', async () => {
   expect(response.status).toBe(201);
   expect(response.body.acc_id).toBe(conta.id);
 });
+
+test('Deve retornar uma transação por ID', async () => {
+  // criando nova transação
+  const novaTransacao = await request(app)
+    .post(TRANSACTION_ACCOUNT)
+    .set('Authorization', `bearer ${token}`)
+    .send({
+      descripition: 'transação get id',
+      date: new Date(),
+      amnount: 985,
+      type: 'O',
+      acc_id: conta.id,
+    });
+  expect(novaTransacao.status).toBe(201);
+
+  // buscar a transação criada
+  const response = await request(app).get(`${TRANSACTION_ACCOUNT}/${novaTransacao.body.id}`)
+    .set('Authorization', `bearer ${token}`);
+  expect(response.status).toBe(200);
+  expect(response.body.descripition).toBe('transação get id');
+});
