@@ -59,3 +59,11 @@ test('Deve lista apenas a conta do usuário logado', async () => {
   expect(response.body).toHaveLength(1);
   expect(response.body[0].descripition).toBe('conta 1 descr');
 });
+
+test('Deve criar uma transação com sucesso', async () => {
+  const response = await request(app).post(TRANSACTION_ACCOUNT)
+    .set('Authorization', `bearer ${token}`)
+    .send({ descripition: 'new tra post test', date: new Date(), amnount: 22, type: 'I', acc_id: conta.id });
+  expect(response.status).toBe(201);
+  expect(response.body.acc_id).toBe(conta.id);
+});

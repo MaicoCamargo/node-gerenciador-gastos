@@ -2,7 +2,6 @@ const ValidationError = require('../errors/validationError');
 
 
 module.exports = (app) => {
-
   /**
    * retorna as transacoes de um determinado usuário
    * @param userID - usuario
@@ -17,5 +16,14 @@ module.exports = (app) => {
       .select();
   };
 
-  return { find };
+  /**
+   * criar uma nova transação
+   * @param transaction - nova transaçao
+   * @return {*} - nova transação salva no banco
+   */
+  const save = (transaction) => {
+    return app.db('transactions').insert(transaction, '*');
+  };
+
+  return { find, save };
 };
