@@ -1,7 +1,22 @@
 const express = require('express');
+const RecursoIndevidoError = require('../errors/recursoIndevidoError');
+
 
 module.exports = (app) => {
   const router = express.Router();
+
+  router.param('id', async (req, res, next) => {
+    /*
+      ------------------------------
+        busca as transações pelo id do usuario logado e pelo id da transação
+       ------------------------------
+    */
+    await app.services.transaction.find(req.user.id, { 'transactions.id': req.params.id }).then((recurso) => {
+      // caso retornar uma transação ela pertence ao usuário
+      if (recurso.length > 0) next();
+      else throw new RecursoIndevidoError();
+    }).catch((err) => next(err));
+  });
 
   router.get('/', (req, res, next) => {
     app.services.transaction.find(req.user.id)
@@ -24,6 +39,12 @@ module.exports = (app) => {
   router.put('/:id', (req, res, next) => {
     app.services.transaction.update(req.params.id, req.body)
       .then((result) => res.status(200).json(result[0]))
+      .catch((error) => next(error));
+  });
+
+  router.delete('/:id', (req, res, next) => {
+    app.services.transaction.deletar(req.params.id)
+      .then(() => res.status(204).send())
       .catch((error) => next(error));
   });
 

@@ -38,5 +38,9 @@ module.exports = (app) => {
     return app.db('transactions').where({ id }).update(transaction, '*');
   };
 
-  return { find, save, findOne, update };
+  const deletar = (id) => {
+    return app.db('transactions').where({ id }).del();
+  };
+
+  return { find, save, findOne, update, deletar };
 };

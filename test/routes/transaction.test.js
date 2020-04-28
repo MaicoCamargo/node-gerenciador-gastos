@@ -8,8 +8,6 @@ let conta2;
 let token;
 const AUTH_ROUTE = '/auth/signin';
 const MAIN_ROUTE = '/api';
-const ROTA_ACCOUNT = `${MAIN_ROUTE}/account`;
-const USER_ACCOUNT = `${MAIN_ROUTE}/user`;
 const TRANSACTION_ACCOUNT = `${MAIN_ROUTE}/transaction`;
 
 beforeAll(async () => {
@@ -116,3 +114,53 @@ test('Devo editar uma transação', async () => {
   expect(response.body.description).toBe(description);
   expect(response.body.id).toBe(id);
 });
+
+test('Deve remover uma transação de um usuário', async () => {
+  // criando nova transação
+  const transacao = await request(app)
+    .post(TRANSACTION_ACCOUNT)
+    .set('Authorization', `bearer ${token}`)
+    .send({
+      description: 'transação delete id',
+      date: new Date(),
+      amnount: 985,
+      type: 'O',
+      acc_id: conta.id,
+    });
+  expect(transacao.status).toBe(201);
+  const { id } = transacao.body;
+  const response = await request(app).delete(`${TRANSACTION_ACCOUNT}/${id}`)
+    .set('Authorization', `bearer ${token}`);
+  expect(response.status).toBe(204);
+
+  const isDeleted = await app.db('transactions').where({ id });
+  expect(isDeleted).toEqual([]);
+  expect(isDeleted.length).toBe(0);
+});
+
+test('Não devo remover uma transação de outro usuário', async () => {
+  // criando nova transação
+  const transacao = await request(app)
+    .post(TRANSACTION_ACCOUNT)
+    .set('Authorization', `bearer ${token}`)
+    .send({
+      description: 'teste#',
+      date: new Date(),
+      amnount: 98,
+      type: 'I',
+      acc_id: conta2.id,
+    });
+  const { id } = transacao.body;
+
+  // tentar removar a transação de outro usuário
+  const response = await request(app)
+    .delete(`${TRANSACTION_ACCOUNT}/${id}`)
+    .set('Authorization', `bearer ${token}`);
+
+  expect(response.status).toBe(403);
+  expect(response.body.error).toBe('Este recurso não pertence a este usuário');
+});
+
+test.skip('Não deve editar transação de outro usuário', async () => {});
+
+test.skip('Não deve remover transação de outro usuário', async () => {});

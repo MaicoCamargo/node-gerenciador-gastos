@@ -29,7 +29,5 @@ module.exports = (app) => {
   const deletar = (id) => {
     return app.db('account').where({ id }).del();
   };
-  return {
-    find, findAll, save, update, deletar,
-  };
+  return { find, findAll, save, update, deletar };
 };
