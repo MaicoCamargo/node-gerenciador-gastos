@@ -1,4 +1,4 @@
-// const ValidationError = require('../errors/validationError');
+const ValidationError = require('../errors/validationError');
 
 
 module.exports = (app) => {
@@ -22,7 +22,13 @@ module.exports = (app) => {
    * @return {*} - nova transação salva no banco
    */
   const save = (transaction) => {
-    return app.db('transactions').insert(transaction, '*');
+    if (!transaction.amnount) throw new ValidationError('valor é um campo obrigatório');
+    if (!transaction.date) throw new ValidationError('data é um campo obrigatório');
+    const newTransaction = { ...transaction };
+    if ((transaction.type === 'I' && transaction.amnount < 0) || (transaction.type === 'O' && transaction.amnount > 0)) {
+      newTransaction.amnount *= -1;
+    }
+    return app.db('transactions').insert(newTransaction, '*');
   };
 
   /**

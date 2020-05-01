@@ -47,7 +47,7 @@ beforeAll(async () => {
     );
 });
 
-test('Deve lista apenas a conta do usuário logado', async () => {
+test('Deve lista apenas a transações do usuário logado', async () => {
   await app.db('transactions').insert([
     { description: 'conta 1 descr', type: 'I', date: new Date(), amnount: 205.56, acc_id: conta.id },
     { description: 'conta 2 descr', type: 'O', date: new Date(), amnount: 125.56, acc_id: conta2.id },
@@ -59,12 +59,63 @@ test('Deve lista apenas a conta do usuário logado', async () => {
 });
 
 test('Deve criar uma transação com sucesso', async () => {
+  // type: 'I' => entrada/deposito
+  // type: 'O' => saida/saque
   const response = await request(app).post(TRANSACTION_ACCOUNT)
     .set('Authorization', `bearer ${token}`)
     .send({ description: 'new tra post test', date: new Date(), amnount: 22, type: 'I', acc_id: conta.id });
   expect(response.status).toBe(201);
   expect(response.body.acc_id).toBe(conta.id);
+  expect(response.body.amnount).toBe('22.00');
 });
+
+test('Transações de entrada devem ser positivas', async () => {
+  // type: 'I' => entrada/deposito
+  // type: 'O' => saida/saque
+  const response = await request(app).post(TRANSACTION_ACCOUNT)
+    .set('Authorization', `bearer ${token}`)
+    .send({ description: 'new tra entrada test', date: new Date(), amnount: -38, type: 'I', acc_id: conta.id });
+  expect(response.status).toBe(201);
+  expect(response.body.acc_id).toBe(conta.id);
+  expect(response.body.amnount).toBe('38.00');
+});
+
+test('Transações de saida devem ser negativas', async () => {
+  // type: 'I' => entrada/deposito
+  // type: 'O' => saida/saque
+  const response = await request(app).post(TRANSACTION_ACCOUNT)
+    .set('Authorization', `bearer ${token}`)
+    .send({ description: 'new tra saida test', date: new Date(), amnount: 150, type: 'O', acc_id: conta.id });
+  expect(response.status).toBe(201);
+  expect(response.body.acc_id).toBe(conta.id);
+  expect(response.body.amnount).toBe('-150.00');
+});
+
+test('Não deve inserir uma transação sem valor', async () => {
+  // type: 'I' => entrada/deposito
+  // type: 'O' => saida/saque
+  const response = await request(app).post(TRANSACTION_ACCOUNT)
+    .set('Authorization', `bearer ${token}`)
+    .send({ description: 'new sem data', date: new Date(), type: 'O', acc_id: conta.id });
+  expect(response.status).toBe(400);
+  expect(response.body.error).toBe('valor é um campo obrigatório');
+});
+
+test('Não deve inserir uma transação sem data', async () => {
+  // type: 'I' => entrada/deposito
+  // type: 'O' => saida/saque
+  const response = await request(app).post(TRANSACTION_ACCOUNT)
+    .set('Authorization', `bearer ${token}`)
+    .send({ description: 'new tra saida test', amnount: 25, type: 'O', acc_id: conta.id });
+  expect(response.status).toBe(400);
+  expect(response.body.error).toBe('data é um campo obrigatório');
+});
+
+test.skip('Não deve inserir uma transação sem tipo', async () => {});
+
+test.skip('Não deve inserir uma transação com tipo invalido', async () => {});
+
+test.skip('Não deve inserir uma transação sem descrição', async () => {});
 
 test('Deve retornar uma transação por ID', async () => {
   // criando nova transação
