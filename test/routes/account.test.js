@@ -10,9 +10,12 @@ let user2;
 
 /* beforeAll -> executa antes de todos os testes
    beforeEach -> executa antes de cada um dos testes */
-beforeEach(async () => {
+beforeAll(async () => {
   await app.db('transactions').del();
   await app.db('account').del();
+});
+
+beforeEach(async () => {
   const mail = `testeACC${Date.now()}@mail.com`;
   const passwd = '1234';
   const result = await app.services.user.save({ nome: 'User acc', mail, passwd });
