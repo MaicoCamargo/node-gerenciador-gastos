@@ -9,6 +9,7 @@ let token;
 const AUTH_ROUTE = '/auth/signin';
 const MAIN_ROUTE = '/api';
 const TRANSACTION_ACCOUNT = `${MAIN_ROUTE}/transaction`;
+const ROTA_ACCOUNT = `${MAIN_ROUTE}/account`;
 
 beforeAll(async () => {
   /*-----------------------
@@ -45,6 +46,24 @@ beforeAll(async () => {
       ],
       '*',
     );
+});
+
+describe('Ao tentar inserir uma transação invalida', async () => {
+  // type: 'I' => entrada/deposito
+  // type: 'O' => saida/saque
+  const templateTestes = async (arg, error) => {
+    const response = await request(app).post(TRANSACTION_ACCOUNT)
+      .set('Authorization', `bearer ${token}`)
+      .send({ description: 'transação test', date: new Date(), amnount: 22, type: 'I', acc_id: conta.id, ...arg });
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe(error);
+  };
+
+  test('Não deve inserir uma transação sem valor', () => templateTestes({ amnount: null }, 'valor é um campo obrigatório'));
+  test('Não deve inserir uma transação sem data', () => templateTestes({ date: null }, 'data é um campo obrigatório'));
+  test('Não deve inserir uma transação sem tipo', () => templateTestes({ type: null }, 'tipo é um campo obrigatório'));
+  test('Não deve inserir uma transação sem desccrição', () => templateTestes({ description: null }, 'descrição é um campo obrigatório'));
+  test('Não deve inserir uma transação com tipo invalido', async () => templateTestes({ type: 'M' }, 'tipo invalido'));
 });
 
 test('Deve lista apenas a transações do usuário logado', async () => {
@@ -90,32 +109,6 @@ test('Transações de saida devem ser negativas', async () => {
   expect(response.body.acc_id).toBe(conta.id);
   expect(response.body.amnount).toBe('-150.00');
 });
-
-test('Não deve inserir uma transação sem valor', async () => {
-  // type: 'I' => entrada/deposito
-  // type: 'O' => saida/saque
-  const response = await request(app).post(TRANSACTION_ACCOUNT)
-    .set('Authorization', `bearer ${token}`)
-    .send({ description: 'new sem data', date: new Date(), type: 'O', acc_id: conta.id });
-  expect(response.status).toBe(400);
-  expect(response.body.error).toBe('valor é um campo obrigatório');
-});
-
-test('Não deve inserir uma transação sem data', async () => {
-  // type: 'I' => entrada/deposito
-  // type: 'O' => saida/saque
-  const response = await request(app).post(TRANSACTION_ACCOUNT)
-    .set('Authorization', `bearer ${token}`)
-    .send({ description: 'new tra saida test', amnount: 25, type: 'O', acc_id: conta.id });
-  expect(response.status).toBe(400);
-  expect(response.body.error).toBe('data é um campo obrigatório');
-});
-
-test.skip('Não deve inserir uma transação sem tipo', async () => {});
-
-test.skip('Não deve inserir uma transação com tipo invalido', async () => {});
-
-test.skip('Não deve inserir uma transação sem descrição', async () => {});
 
 test('Deve retornar uma transação por ID', async () => {
   // criando nova transação
@@ -215,3 +208,10 @@ test('Não devo remover uma transação de outro usuário', async () => {
 test.skip('Não deve editar transação de outro usuário', async () => {});
 
 test.skip('Não deve remover transação de outro usuário', async () => {});
+
+test('Não deve remover conta que possuir transações', async () => {
+  const response = await request(app).delete(`${ROTA_ACCOUNT}/${conta.id}`)
+    .set('Authorization', `bearer ${token}`);
+  expect(response.status).toBe(400);
+  expect(response.body.error).toBe('Essa conta possui transações');
+});

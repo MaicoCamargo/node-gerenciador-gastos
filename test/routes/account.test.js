@@ -11,6 +11,8 @@ let user2;
 /* beforeAll -> executa antes de todos os testes
    beforeEach -> executa antes de cada um dos testes */
 beforeEach(async () => {
+  await app.db('transactions').del();
+  await app.db('account').del();
   const mail = `testeACC${Date.now()}@mail.com`;
   const passwd = '1234';
   const result = await app.services.user.save({ nome: 'User acc', mail, passwd });
@@ -109,7 +111,7 @@ test('Não deve alterar contas de outro usuário', async () => {
   expect(response.body.error).toBe('Este recurso não pertence a este usuário');
 });
 
-test('Não deve remover contas de outro usuário',async () => {
+test('Não deve remover contas de outro usuário', async () => {
   /*--------------------
   * - criar uma conta para o usuario 2
   * - tentar acesso com outro usuario (dentro da variavel token)

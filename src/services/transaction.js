@@ -24,6 +24,9 @@ module.exports = (app) => {
   const save = (transaction) => {
     if (!transaction.amnount) throw new ValidationError('valor é um campo obrigatório');
     if (!transaction.date) throw new ValidationError('data é um campo obrigatório');
+    if (!transaction.type) throw new ValidationError('tipo é um campo obrigatório');
+    if (!transaction.description) throw new ValidationError('descrição é um campo obrigatório');
+    if (!(transaction.type === 'I' || transaction.type === 'O')) throw new ValidationError('tipo invalido');
     const newTransaction = { ...transaction };
     if ((transaction.type === 'I' && transaction.amnount < 0) || (transaction.type === 'O' && transaction.amnount > 0)) {
       newTransaction.amnount *= -1;

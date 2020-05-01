@@ -26,7 +26,9 @@ module.exports = (app) => {
     return app.db('account').where({ id }).update(account, '*');
   };
 
-  const deletar = (id) => {
+  const deletar = async (id) => {
+    const transactions = await app.services.transaction.findOne({ acc_id: id });
+    if (transactions) throw new ValidationError('Essa conta possui transações');
     return app.db('account').where({ id }).del();
   };
   return { find, findAll, save, update, deletar };
