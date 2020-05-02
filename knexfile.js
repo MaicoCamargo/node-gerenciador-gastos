@@ -9,6 +9,7 @@ module.exports = {
       database: 'gestor-gastos-db',
     },
     migrations: { directory: 'src/migrations' },
+    seeds: { directory: 'src/seeds' },
 
   },
 };
