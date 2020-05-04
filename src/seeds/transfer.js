@@ -8,7 +8,7 @@ exports.seed = (knex) => {
     .then(() => knex('account').del())
     .then(() => knex('user').del())
     .then(() => knex('user').insert([
-      { nome: 'seed *1', mail: `seed_1${Date.now()}`, passwd: '$2a$10$88HpHwZQrDjfBDwWQ40PuuuNQ44SKfKS3qf60oQRIFOJMW4pt1H.a' },
+      { nome: 'seed *1', mail: 'seed_1@email', passwd: '$2a$10$88HpHwZQrDjfBDwWQ40PuuuNQ44SKfKS3qf60oQRIFOJMW4pt1H.a' },
       { nome: 'seed *2', mail: `seed_2${Date.now()}`, passwd: '$2a$10$88HpHwZQrDjfBDwWQ40PuuuNQ44SKfKS3qf60oQRIFOJMW4pt1H.a' },
     ], '*'))
     .then((result) => {
@@ -46,7 +46,7 @@ exports.seed = (knex) => {
             acc_id: transfer1.acc_dest_id,
             type: 'O',
             transfer_id: transfer1.id,
-          },{
+          }, {
             description: 'transacao from conta3user2',
             date: new Date(),
             amnount: 150,
