@@ -26,12 +26,19 @@ beforeAll(async () => {
   [contaOrigem, contaDestino] = await app.db('account').where({ user_id: user[0].id });
 });
 
-describe('Listar Transações', () => {
-  test('Deve listar apenas transferencias do usuário logado', async () => {
+describe('Listar Transferências', () => {
+  test('Deve listar apenas transferências do usuário logado', async () => {
     const response = await request(app).get(TRANSFER_ROUTE).set('Authorization', `bearer ${TOKEN}`);
     expect(response.status).toBe(200);
     expect(response.body).toHaveLength(1);
     expect(response.body[0].description).toBe('transfer @1');
+  });
+
+  test('Deve listar uma transferência pelo ID', async () => {
+    const transferencias = await app.db('transfers');
+    const response = await request(app).get(`${TRANSFER_ROUTE}/${transferencias[0].id}`).set('Authorization', `bearer ${TOKEN}`);
+    expect(response.status).toBe(200);
+    expect(response.body.description).toBe(transferencias[0].description);
   });
 });
 
@@ -40,7 +47,7 @@ describe('Ao criar Transferências validas...', () => {
   let transactionSaida;
   let transactionEntrada;
 
-  test('Deve criar uma transação com sucesso, e criar suas transações', async () => {
+  test('Deve criar uma transferência com sucesso, e criar suas transações', async () => {
     const novaTransferencia = { description: 'nova transfer #', data: new Date(), ammount: 250, acc_ori_id: contaOrigem.id, acc_dest_id: contaDestino.id, user_id: user.id };
 
     const response = await request(app).post(TRANSFER_ROUTE).set('Authorization', `bearer ${TOKEN}`).send(novaTransferencia);
@@ -132,5 +139,49 @@ describe('Ao criar Transferências invalidas...', () => {
     const response = await createTransferenciaTeste({ acc_ori_id: contaDeOutroUsuario.id });
     expect(response.status).toBe(400);
     expect(response.body.error).toBe('Uma ou ambas contas não pertencem a este usuário');
+  });
+});
+
+describe('Ao alterar Transferências validas...', () => {
+  let transferenciaEditada;
+  let transactionSaida;
+  let transactionEntrada;
+
+  test('Deve alterar uma transferência com sucesso, e criar suas transações', async () => {
+    const transferencias = await app.db('transfers');
+    const transferencia = { description: 'transfer updated #', data: new Date(), ammount: 300, acc_ori_id: contaOrigem.id, acc_dest_id: contaDestino.id, user_id: user.id };
+
+    const response = await request(app).put(`${TRANSFER_ROUTE}/${transferencias[0].id}`).set('Authorization', `bearer ${TOKEN}`).send(transferencia);
+    transferenciaEditada = { ...response.body };
+
+    expect(response.status).toBe(200);
+    expect(transferenciaEditada.description).toBe('transfer updated #');
+
+    // validar se as transações foram editadas
+    const transactions = await app.db('transactions').where({ transfer_id: transferenciaEditada.id }).orderBy('amnount');
+    expect(transactions).toHaveLength(2);
+    expect(transactions[0].description).toBe(`transfer from conta#${transferenciaEditada.acc_ori_id}`);
+    expect(transactions[0].amnount).toBe('-300.00');
+    expect(transactions[1].amnount).toBe('300.00');
+    expect(transactions[0].acc_id).toBe(contaOrigem.id);
+    expect(transactions[1].acc_id).toBe(contaDestino.id);
+
+    [transactionSaida, transactionEntrada] = transactions;
+  });
+
+  test('A transação de saida deve ser negativa', () => {
+    expect(transactionSaida.type).toBe('O');
+    // TODO remover esse valor chumbado da transferencia criada
+    expect(transactionSaida.amnount).toBe('-300.00');
+  });
+
+  test('A transação de entrada deve ser positiva', () => {
+    expect(transactionEntrada.type).toBe('I');
+    expect(transactionEntrada.amnount).toBe(transferenciaEditada.ammount);
+  });
+
+  test('Transacões criadas devem estar associadas há transferência criada', () => {
+    expect(transactionSaida.transfer_id).toBe(transferenciaEditada.id);
+    expect(transactionEntrada.transfer_id).toBe(transferenciaEditada.id);
   });
 });

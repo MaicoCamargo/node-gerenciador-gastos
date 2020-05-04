@@ -5,6 +5,10 @@ module.exports = (app) => {
     return app.db('transfers').where(filter).select();
   };
 
+  const findOne = (filter = {}) => {
+    return app.db('transfers').where(filter).first();
+  };
+
   const save = async (transferencia) => {
     if (!transferencia.description) throw new ValidationError('Descrição é um campo obrigatório');
     if (!transferencia.data) throw new ValidationError('Data é um campo obrigatório');
@@ -38,7 +42,35 @@ module.exports = (app) => {
     }];
 
     await app.db('transactions').insert(transaction);
+
     return result;
   };
-  return { find, save };
+
+  const update = async (id, transferencia) => {
+    const updated = await app.db('transfers').where({ id }).update(transferencia, '*');
+
+    const transfer = { ...updated[0] };
+
+    const transaction = [{
+      description: `transfer from conta#${transfer.acc_ori_id}`,
+      type: 'O',
+      date: transfer.data,
+      amnount: transfer.ammount * -1,
+      acc_id: transfer.acc_ori_id,
+      transfer_id: transfer.id,
+    }, {
+      description: `transfer to conta#${transfer.acc_dest_id}`,
+      type: 'I',
+      date: transfer.data,
+      amnount: transfer.ammount,
+      acc_id: transfer.acc_dest_id,
+      transfer_id: transfer.id,
+    }];
+
+    await app.db('transactions').insert({ transfer_id: transfer.id }).del();
+    await app.db('transactions').insert(transaction);
+
+    return updated;
+  };
+  return { find, save, findOne, update };
 };
