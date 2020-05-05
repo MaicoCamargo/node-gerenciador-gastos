@@ -245,3 +245,9 @@ describe('Ao alterar Transferências invalidas...', () => {
     expect(response.body.error).toBe('Uma ou ambas contas não pertencem a este usuário');
   });
 });
+
+describe('Ao remover uma transferência...', () => {
+  test('Deve retornar o status 204, e remover o registro do banco', async () => {});
+
+  test('As transações associadas devem ser removidas', async () => {});
+});
