@@ -48,7 +48,7 @@ describe('Ao criar Transferências validas...', () => {
   let transactionEntrada;
 
   test('Deve criar uma transferência com sucesso, e criar suas transações', async () => {
-    const novaTransferencia = { description: 'nova transfer #', data: new Date(), ammount: 250, acc_ori_id: contaOrigem.id, acc_dest_id: contaDestino.id, user_id: user.id };
+    const novaTransferencia = { description: 'nova transfer #', data: new Date(), ammount: 250, acc_ori_id: contaOrigem.id, acc_dest_id: contaDestino.id, user_id: user[0].id };
 
     const response = await request(app).post(TRANSFER_ROUTE).set('Authorization', `bearer ${TOKEN}`).send(novaTransferencia);
     transferenciaCriada = { ...response.body };
@@ -94,7 +94,7 @@ describe('Ao criar Transferências invalidas...', () => {
         ammount: 250,
         acc_ori_id: contaOrigem.id,
         acc_dest_id: contaDestino.id,
-        user_id: user.id,
+        user_id: user[0].id,
         ...newData,
       });
   };
@@ -149,7 +149,7 @@ describe('Ao alterar Transferências validas...', () => {
 
   test('Deve alterar uma transferência com sucesso, e criar suas transações', async () => {
     const transferencias = await app.db('transfers');
-    const transferencia = { description: 'transfer updated #', data: new Date(), ammount: 300, acc_ori_id: contaOrigem.id, acc_dest_id: contaDestino.id, user_id: user.id };
+    const transferencia = { description: 'transfer updated #', data: new Date(), ammount: 300, acc_ori_id: contaOrigem.id, acc_dest_id: contaDestino.id, user_id: user[0].id };
 
     const response = await request(app).put(`${TRANSFER_ROUTE}/${transferencias[0].id}`).set('Authorization', `bearer ${TOKEN}`).send(transferencia);
     transferenciaEditada = { ...response.body };
@@ -183,5 +183,65 @@ describe('Ao alterar Transferências validas...', () => {
   test('Transacões criadas devem estar associadas há transferência criada', () => {
     expect(transactionSaida.transfer_id).toBe(transferenciaEditada.id);
     expect(transactionEntrada.transfer_id).toBe(transferenciaEditada.id);
+  });
+});
+
+describe('Ao alterar Transferências invalidas...', () => {
+  const createTransferenciaTeste = async (newData) => {
+    const transferencias = await app.db('transfers');
+
+    return request(app).put(`${TRANSFER_ROUTE}/${transferencias[0].id}`)
+      .set('Authorization', `bearer ${TOKEN}`)
+      .send({
+        description: 'nova transfer #',
+        data: new Date(),
+        ammount: 250,
+        acc_ori_id: contaOrigem.id,
+        acc_dest_id: contaDestino.id,
+        user_id: user.id,
+        ...newData,
+      });
+  };
+  test('Sem descrição', async () => {
+    const response = await createTransferenciaTeste({ description: null });
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('Descrição é um campo obrigatório');
+  });
+
+  test('Sem data', async () => {
+    const response = await createTransferenciaTeste({ data: null });
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('Data é um campo obrigatório');
+  });
+
+  test('Sem valor', async () => {
+    const response = await createTransferenciaTeste({ ammount: null });
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('Valor é um campo obrigatório');
+  });
+
+  test('Sem conta de origem', async () => {
+    const response = await createTransferenciaTeste({ acc_ori_id: null });
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('Conta é um campo obrigatório');
+  });
+
+  test('Sem conta de destino', async () => {
+    const response = await createTransferenciaTeste({ acc_dest_id: null });
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('Conta é um campo obrigatório');
+  });
+
+  test('Conta de origem e destino iguais', async () => {
+    const response = await createTransferenciaTeste({ acc_dest_id: contaOrigem.id });
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('Conta origem e destino não podem ser iguais');
+  });
+
+  test('Contas que Pertencem a outro usuário', async () => {
+    const contaDeOutroUsuario = await app.db('account').where('user_id', '!=', user[0].id).first();
+    const response = await createTransferenciaTeste({ acc_ori_id: contaDeOutroUsuario.id });
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('Uma ou ambas contas não pertencem a este usuário');
   });
 });
