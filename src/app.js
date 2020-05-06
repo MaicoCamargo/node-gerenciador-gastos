@@ -22,9 +22,10 @@ app.use((err, req, res, next) => {
   const { name, message, stack } = err;
   if (name === 'Validation Error') {
     res.status(400).json({ error: err.message });
-  } if (name === 'Recurso Indevido Error') {
+  } else if (name === 'Recurso Indevido Error') {
     res.status(403).json({ error: err.message });
   } else {
+    console.log(message);
     res.status(500).json({ name, message, stack });
   }
   next(err);

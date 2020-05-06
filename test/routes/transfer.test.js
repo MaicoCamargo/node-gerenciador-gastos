@@ -40,6 +40,13 @@ describe('Listar Transferências', () => {
     expect(response.status).toBe(200);
     expect(response.body.description).toBe(transferencias[0].description);
   });
+
+  test('Não deve acessar transferências de outro usuario', async () => {
+    const transferenciaDeOutroUsuario = await app.db('transfers').where('user_id', '!=', user[0].id).first();
+    const response = await request(app).get(`${TRANSFER_ROUTE}/${transferenciaDeOutroUsuario.id}`).set('Authorization', `bearer ${TOKEN}`);
+    expect(response.status).toBe(403);
+    expect(response.body.error).toBe('Este recurso não pertence a este usuário');
+  });
 });
 
 describe('Ao criar Transferências validas...', () => {
@@ -89,7 +96,7 @@ describe('Ao criar Transferências invalidas...', () => {
     return request(app).post(TRANSFER_ROUTE)
       .set('Authorization', `bearer ${TOKEN}`)
       .send({
-        description: 'nova transfer #',
+        description: 'transf #',
         data: new Date(),
         ammount: 250,
         acc_ori_id: contaOrigem.id,
@@ -188,7 +195,7 @@ describe('Ao alterar Transferências validas...', () => {
 
 describe('Ao alterar Transferências invalidas...', () => {
   const createTransferenciaTeste = async (newData) => {
-    const transferencias = await app.db('transfers');
+    const transferencias = await app.db('transfers').where({ user_id: user[0].id });
 
     return request(app).put(`${TRANSFER_ROUTE}/${transferencias[0].id}`)
       .set('Authorization', `bearer ${TOKEN}`)
@@ -247,7 +254,20 @@ describe('Ao alterar Transferências invalidas...', () => {
 });
 
 describe('Ao remover uma transferência...', () => {
-  test('Deve retornar o status 204, e remover o registro do banco', async () => {});
+  test('Deve retornar o status 204, e remover o registro do banco', async () => {
+    const transferencias = await app.db('transfers').where({ user_id: user[0].id });
+    const response = await request(app).delete(`${TRANSFER_ROUTE}/${transferencias[0].id}`)
+      .set('Authorization', `bearer ${TOKEN}`);
+    expect(response.status).toBe(204);
 
-  test('As transações associadas devem ser removidas', async () => {});
+    const deleted = await app.db('transfers').where({ id: transferencias[0].id });
+    expect(deleted).toHaveLength(0);
+  });
+
+  test('As transações associadas devem ser removidas', async () => {
+    const transferencias = await app.db('transfers');
+
+    const transactions = await app.db('transactions').where({ transfer_id: transferencias[0].id });
+    expect(transactions).toHaveLength(0);
+  });
 });
