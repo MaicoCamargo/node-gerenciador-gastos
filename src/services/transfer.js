@@ -39,6 +39,7 @@ module.exports = (app) => {
       amnount: transfer.ammount * -1,
       acc_id: transfer.acc_ori_id,
       transfer_id: transfer.id,
+      status: true,
     }, {
       description: `transfer to conta#${transfer.acc_dest_id}`,
       type: 'I',
@@ -46,6 +47,7 @@ module.exports = (app) => {
       amnount: transfer.ammount,
       acc_id: transfer.acc_dest_id,
       transfer_id: transfer.id,
+      status: true,
     }];
 
     await app.db('transactions').insert(transaction);
