@@ -89,6 +89,11 @@ describe('Ao criar Transferências validas...', () => {
     expect(transactionSaida.transfer_id).toBe(transferenciaCriada.id);
     expect(transactionEntrada.transfer_id).toBe(transferenciaCriada.id);
   });
+
+  test('Deve estar com o status true', () => {
+    expect(transactionSaida.status).toBe(true);
+    expect(transactionEntrada.status).toBe(true);
+  });
 });
 
 describe('Ao criar Transferências invalidas...', () => {

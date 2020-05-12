@@ -161,7 +161,7 @@ describe('Ao calcular saldo do usuário', () => {
     const transferencia = {
       description: 'nova transfer #balance',
       data: new Date(),
-      ammount: 999,
+      ammount: 200,
       acc_ori_id: contaOrigem.id,
       acc_dest_id: contaDestino.id,
     };
@@ -171,10 +171,10 @@ describe('Ao calcular saldo do usuário', () => {
     const response = await request(app).get(BALANCE_ROUTE).set('authorization', `bearer ${TOKEN}`);
     expect(response.status).toBe(200);
     expect(response.body).toHaveLength(2);
-    expect(response.body[0].sum).toBe('-300.00');
+    expect(response.body[0].sum).toBe('-500.00');
     expect(response.body[0].id).toBe(contaOrigem.id);
 
-    expect(response.body[1].sum).toBe('500.00');
+    expect(response.body[1].sum).toBe('700.00');
     expect(response.body[1].id).toBe(contaDestino.id);
   });
 });
