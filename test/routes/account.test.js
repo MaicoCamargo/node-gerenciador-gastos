@@ -12,6 +12,7 @@ let user2;
    beforeEach -> executa antes de cada um dos testes */
 beforeAll(async () => {
   await app.db('transactions').del();
+  await app.db('transfers').del();
   await app.db('account').del();
 });
 

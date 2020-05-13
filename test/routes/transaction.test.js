@@ -20,6 +20,7 @@ beforeAll(async () => {
 
   // deletando registros do banco
   await app.db('transactions').del();
+  await app.db('transfers').del();
   await app.db('account').del();
   await app.db('user').del();
 
